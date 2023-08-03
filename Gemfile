@@ -48,3 +48,8 @@ end
 
 gem 'devise'
 gem 'devise-jwt'
+
+gem 'activestorage'
+
+gem 'active_model_serializers'
+gem 'faker'

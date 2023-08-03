@@ -33,6 +33,14 @@ class ArticlesController < ApplicationController
     
     @articles = @articles.limit(@cntperpage).offset(@page*@cntperpage)
 
+    @articles = @articles.map{ |article| 
+      if article.image.attached? 
+        article.as_json.merge(image_path: url_for(article.image))
+      else
+        article
+      end
+    }
+
     render json: {articles: @articles , total_articles: @total}, status: :ok
   end
 
@@ -44,7 +52,13 @@ class ArticlesController < ApplicationController
   # GET /articles/myarticles
   def myarticles
     @articles = current_user.articles.all.order(created_at: :desc)
-
+    @articles = @articles.map{ |article| 
+      if article.image.attached? 
+        article.as_json.merge(image_path: url_for(article.image))
+      else
+        article
+      end
+    }
     render json: @articles, status: :ok
   end
 
@@ -82,7 +96,7 @@ class ArticlesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def article_params
-      params.require(:article).permit(:title, :topic, :text, :likes, :comments_cnt, :views, :user_id)
+      params.require(:article).permit(:title, :topic, :text, :likes, :comments_cnt, :views, :user_id, :image)
     end
 
 
