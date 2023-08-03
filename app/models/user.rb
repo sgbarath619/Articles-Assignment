@@ -9,4 +9,6 @@ class User < ApplicationRecord
   def jwt_payload
     super
   end
+
+  has_many :articles, class_name: "Article", foreign_key: "user_id", dependent: :destroy
 end

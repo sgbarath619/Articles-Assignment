@@ -1,0 +1,15 @@
+class CreateArticles < ActiveRecord::Migration[7.0]
+  def change
+    create_table :articles do |t|
+      t.string :title
+      t.string :topic
+      t.string :text
+      t.integer :likes
+      t.integer :comments
+      t.integer :views
+      t.references :user, null: false, foreign_key: true
+
+      t.timestamps
+    end
+  end
+end

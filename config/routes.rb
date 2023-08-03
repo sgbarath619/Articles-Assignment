@@ -1,5 +1,9 @@
 Rails.application.routes.draw do
 
+  get "articles/myarticles", to:"articles#myarticles"
+
+  resources :articles
+
   devise_for :users, controllers: {
     sessions: 'users/sessions',
     registrations: 'users/registrations'
