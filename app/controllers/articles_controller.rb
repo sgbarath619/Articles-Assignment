@@ -1,13 +1,39 @@
 class ArticlesController < ApplicationController
   before_action :set_article, only: %i[ show update destroy ]
   before_action :authenticate_user!, except:[:index, :show]  
-  before_action :verify_user, only:[:edit, :update, :destroy, :myarticles]
+  before_action :verify_user, only:[:edit, :update, :destroy]
 
   # GET /articles
   def index
+    
     @articles = Article.all
+    @articles = @articles.where('title ilike ?', "%#{params[:title]}%" ) if params[:title].present?
+    @articles = @articles.where('topic ilike ?', "%#{params[:topic]}%" ) if params[:topic].present?
+    @articles = @articles.where('text ilike ?', "%#{params[:text]}%" ) if params[:text].present?
+    
+    @articles = @articles.where("created_at >= #{params[:start_date]}" ) if params[:start_date].present?
+    @articles = @articles.where("created_at <= #{params[:end_date]}" ) if params[:end_date].present?
 
-    render json: @articles, status: :ok
+    @articles = @articles.where("likes >= #{params[:likes]}" ) if params[:likes].present?
+    @articles = @articles.where("comments_cnt >= #{params[:comments_cnt]}" ) if params[:comments_cnt].present?
+    @articles = @articles.where("views >= #{params[:views]}" ) if params[:views].present?
+
+    @articles = @articles.where(user_id: params[:userid] ) if params[:userid].present?
+
+    order = params.fetch('order',"desc")
+    order = "desc" if order != "asc"
+    order_by = params.fetch('order_by',"created_at")
+    order_by = "created_at" if not ["created_at","likes","views"].include?(order_by)
+    @articles = @articles.order("#{order_by} #{order.upcase}")
+
+    @total = @articles.count()
+    @total = [@total,1].max
+    @page = params.fetch('pg',0).to_i 
+    @cntperpage = params.fetch('perpage',@total).to_i
+    
+    @articles = @articles.limit(@cntperpage).offset(@page*@cntperpage)
+
+    render json: {articles: @articles , total_articles: @total}, status: :ok
   end
 
   # GET /articles/1
@@ -17,7 +43,7 @@ class ArticlesController < ApplicationController
 
   # GET /articles/myarticles
   def myarticles
-    @articles = current_author.articles.all
+    @articles = current_user.articles.all.order(created_at: :desc)
 
     render json: @articles, status: :ok
   end
@@ -56,7 +82,7 @@ class ArticlesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def article_params
-      params.require(:article).permit(:title, :topic, :text, :likes, :comments, :views, :user_id)
+      params.require(:article).permit(:title, :topic, :text, :likes, :comments_cnt, :views, :user_id)
     end
 
 
