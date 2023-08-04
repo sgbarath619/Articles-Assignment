@@ -15,6 +15,9 @@ Rails.application.routes.draw do
   get "articles/topics"
   get "articles/toparticles"
 
+  post "payment/create"
+  post "payment/verify"
+
   resources :articles
 
   devise_for :users, controllers: {
