@@ -1,4 +1,6 @@
 class UserController < ApplicationController
+  # require 'json'
+
   before_action :set_user, only: %i[ show follow unfollow ]
   before_action :authenticate_user!, except: [:index, :show]  
 
@@ -8,11 +10,15 @@ class UserController < ApplicationController
     else
       @users = User.all
     end
-    render json: @users
+    render json: @users, status: :ok
   end
-
+  
   def show
     render json: @user, status: :ok
+  end
+  
+  def myprofile
+    render json: current_user, status: :ok
   end
 
   def follow
@@ -49,20 +55,36 @@ class UserController < ApplicationController
   end
 
   def add_liked_article
-    current_user.liked_articles.push(params[:id]) if params[:id].present?
-    if current_user.save
-      render json: current_user, status: :ok
-    else
-      render json: current_user.errors, status: :unprocessable_entity
+    if params[:id].present? and (not current_user.liked_articles.include? params[:id].to_i)
+      current_user.liked_articles.push(params[:id])
+      article = Article.find(params[:id])
+      article.likes += 1
+
+      if current_user.save
+        article.save
+        render json: {user_liked_articles: current_user.liked_articles, article_like_count: article.likes}, status: :ok
+      else
+        render json: current_user.errors, status: :unprocessable_entity
+      end
+    else 
+      render json: {message: "Already liked"}, status: :ok
     end
   end
 
   def remove_liked_article
-    current_user.liked_articles.delete(params[:id].to_i) if params[:id].present?
-    if current_user.save
-      render json: current_user, status: :ok
-    else
-      render json: current_user.errors, status: :unprocessable_entity
+    if params[:id].present? and current_user.liked_articles.include? params[:id].to_i
+      current_user.liked_articles.delete(params[:id].to_i)
+      article = Article.find(params[:id])
+      article.likes -= 1
+
+      if current_user.save
+        article.save
+        render json: {user_liked_articles: current_user.liked_articles, article_like_count: article.likes}, status: :ok
+      else
+        render json: current_user.errors, status: :unprocessable_entity
+      end
+    else 
+      render json: {message: "Already liked"}, status: :ok
     end
   end
 

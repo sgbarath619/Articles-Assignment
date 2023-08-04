@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   get 'user' => "user#index"
+  get 'user/myprofile'
   get 'user/followers'
   get 'user/following'
   get 'user/:id' => 'user#show'
@@ -10,6 +11,9 @@ Rails.application.routes.draw do
   delete 'user/:id/unfollow' => 'user#unfollow'
 
   get "articles/myarticles", to:"articles#myarticles"
+  get "articles/recomended"
+  get "articles/topics"
+  get "articles/toparticles"
 
   resources :articles
 

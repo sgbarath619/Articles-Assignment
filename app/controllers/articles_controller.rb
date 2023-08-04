@@ -1,6 +1,6 @@
 class ArticlesController < ApplicationController
   before_action :set_article, only: %i[ show update destroy ]
-  before_action :authenticate_user!, except:[:index, :show]  
+  before_action :authenticate_user!, except:[:index, :show, :toparticles]  
   before_action :verify_user, only:[:edit, :update, :destroy]
 
   # GET /articles
@@ -45,14 +45,40 @@ class ArticlesController < ApplicationController
   # GET /articles/myarticles
   def myarticles
     @articles = current_user.articles.all.order(created_at: :desc)
-    @articles = @articles.map{ |article| 
-      if article.image.attached? 
-        article.as_json.merge(image_path: url_for(article.image))
-      else
-        article
-      end
-    }
+    # @articles = @articles.map{ |article| 
+    #   if article.image.attached? 
+    #     article.as_json.merge(image_path: url_for(article.image))
+    #   else
+    #     article
+    #   end
+    # }
     render json: @articles, status: :ok
+  end
+
+  def recomended
+    liked = current_user.liked_articles
+    if liked.empty?
+      @articles = Article.where("user_id != #{current_user.id}").order(likes: :desc)
+    else
+      liked = liked.map{|id| Article.find(id).user_id}
+      @articles = Article.where(user_id: liked).order(likes: :desc)
+    end
+    render json: @articles, status: :ok
+  end
+
+  def topics
+    topics = Article.all
+    topics = topics.map{|ar| ar.topic}
+    topics = topics.uniq
+    render json: topics, status: :ok 
+  end
+
+  def toparticles
+    articles = Article.all
+    articles = articles.map{|a| {id: a.id, value: a.likes.to_i+a.comments_cnt.to_i+a.views.to_i}}
+    articles = articles.sort_by{|a| -1*a[:value]}
+    articles = articles.map{|a| Article.find(a[:id])}
+    render json: articles, status: :ok
   end
 
   # POST /articles
