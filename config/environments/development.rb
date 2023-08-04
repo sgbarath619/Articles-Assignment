@@ -52,16 +52,17 @@ Rails.application.configure do
 
   # Highlight code that triggered database queries in logs.
   config.active_record.verbose_query_logs = true
-
-
+  
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
-
+  
   # Annotate rendered view with file names.
   # config.action_view.annotate_rendered_view_with_filenames = true
-
+  
   # Uncomment if you wish to allow Action Cable access from any origin.
   # config.action_cable.disable_request_forgery_protection = true
-
+  
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+  
+  config.default_url_options = { host: 'localhost', port: 3000 }
 end

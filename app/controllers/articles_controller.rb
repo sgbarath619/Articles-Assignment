@@ -33,15 +33,8 @@ class ArticlesController < ApplicationController
     
     @articles = @articles.limit(@cntperpage).offset(@page*@cntperpage)
 
-    @articles = @articles.map{ |article| 
-      if article.image.attached? 
-        article.as_json.merge(image_path: url_for(article.image))
-      else
-        article
-      end
-    }
-
-    render json: {articles: @articles , total_articles: @total}, status: :ok
+    # render json: {articles: @articles, total: @total}, status: :ok
+    render json: @articles, each_serializer:ArticleSerializer, status: :ok
   end
 
   # GET /articles/1
