@@ -16,7 +16,7 @@ Rails.application.routes.draw do
   get "articles/toparticles"
 
   post "payment/create"
-  post "payment/verify"
+  post "payment/verify", to:"payment#webhook"
 
   resources :articles
 

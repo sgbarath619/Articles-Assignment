@@ -55,3 +55,5 @@ gem 'active_model_serializers'
 gem 'faker'
 
 gem 'razorpay'
+
+# gem 'openssl', git: 'https://github.com/ruby/openssl'
