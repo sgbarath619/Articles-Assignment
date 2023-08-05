@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   get "articles/recomended"
   get "articles/topics"
   get "articles/toparticles"
+  get "articles/viewhistory"
 
   get "lists/mylists"
   post "lists/create" => 'lists#create'

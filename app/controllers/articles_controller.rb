@@ -41,6 +41,9 @@ class ArticlesController < ApplicationController
   def show
     current_user.viewsleft += 1 if current_user.lastview < Date.today
     if @article.user_id == current_user.id
+      current_user.viewhistory.push(@article.id.to_i)
+      current_user.save
+      
       render json: @article, status: :ok
     elsif current_user.viewsleft > 0
       #1 free view per day
@@ -50,6 +53,10 @@ class ArticlesController < ApplicationController
 
       current_user.lastview = Date.today
       current_user.save
+      
+      current_user.viewhistory.push(@article.id.to_i)
+      current_user.save
+
       @article.views += 1
       @article.save
       render json: @article, status: :ok
@@ -90,6 +97,12 @@ class ArticlesController < ApplicationController
     articles = articles.sort_by{|a| -1*a[:value]}
     articles = articles.map{|a| Article.find(a[:id])}
     render json: articles, serializer:ArticleIndexSerializer, status: :ok
+  end
+
+  def viewhistory
+    art_list = current_user.viewhistory
+    art_list = art_list.map{|i| Article.find(i)}
+    render json: art_list, each_serializer:ArticleIndexSerializer, status: :ok
   end
 
   # POST /articles
