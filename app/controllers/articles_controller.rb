@@ -6,7 +6,7 @@ class ArticlesController < ApplicationController
   # GET /articles
   def index
     
-    @articles = Article.all
+    @articles = Article.all.where(published: true)
     @articles = @articles.where('title ilike ?', "%#{params[:title]}%" ) if params[:title].present?
     @articles = @articles.where('topic ilike ?', "%#{params[:topic]}%" ) if params[:topic].present?
     @articles = @articles.where('text ilike ?', "%#{params[:text]}%" ) if params[:text].present?
@@ -67,23 +67,25 @@ class ArticlesController < ApplicationController
   def recomended
     liked = current_user.liked_articles
     if liked.empty?
-      @articles = Article.where("user_id != #{current_user.id}").order(likes: :desc)
+      @articles = Article.all.where(published: true)
+      @articles = @articles.where("user_id != #{current_user.id}").order(likes: :desc)
     else
       liked = liked.map{|id| Article.find(id).user_id}
-      @articles = Article.where(user_id: liked).order(likes: :desc)
+      @articles = Article.all.where(published: true)
+      @articles = @articles.where(user_id: liked).order(likes: :desc)
     end
     render json: @articles, each_serializer:ArticleIndexSerializer, status: :ok
   end
 
   def topics
-    topics = Article.all
+    topics = Article.all.where(published: true)
     topics = topics.map{|ar| ar.topic}
     topics = topics.uniq
     render json: topics, status: :ok 
   end
 
   def toparticles
-    articles = Article.all
+    articles = Article.all.where(published: true)
     articles = articles.map{|a| {id: a.id, value: a.likes.to_i+a.comments_cnt.to_i+a.views.to_i}}
     articles = articles.sort_by{|a| -1*a[:value]}
     articles = articles.map{|a| Article.find(a[:id])}
@@ -120,11 +122,12 @@ class ArticlesController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_article
       @article = Article.find(params[:id])
+      render json: {message: "need to publish the article first, it is sill in draft"},status: :unprocessable_entity if @article.published==false
     end
 
     # Only allow a list of trusted parameters through.
     def article_params
-      params.require(:article).permit(:title, :topic, :text, :likes, :comments_cnt, :views, :user_id, :image)
+      params.require(:article).permit(:title, :topic, :text, :likes, :comments_cnt, :views, :user_id, :image, :published)
     end
 
 

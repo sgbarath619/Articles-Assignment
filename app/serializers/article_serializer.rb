@@ -2,7 +2,7 @@ class ArticleSerializer < ActiveModel::Serializer
 
   include Rails.application.routes.url_helpers
 
-  attributes :id, :title, :topic, :text, :likes, :comments_cnt, :views, :user_id, :created_at, :updated_at, :image_url 
+  attributes :id, :title, :topic, :published, :text, :likes, :comments_cnt, :views, :user_id, :created_at, :updated_at, :image_url 
 
   def image_url
     if object.image.attached?
