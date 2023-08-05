@@ -1,6 +1,6 @@
 class ArticlesController < ApplicationController
   before_action :set_article, only: %i[ show update destroy ]
-  before_action :authenticate_user!, except:[:index, :show, :toparticles]  
+  before_action :authenticate_user!, except:[:index, :toparticles]  
   before_action :verify_user, only:[:edit, :update, :destroy]
 
   # GET /articles
@@ -34,12 +34,28 @@ class ArticlesController < ApplicationController
     @articles = @articles.limit(@cntperpage).offset(@page*@cntperpage)
 
     # render json: {articles: @articles, total: @total}, status: :ok
-    render json: @articles, each_serializer:ArticleSerializer, status: :ok
+    render json: @articles, each_serializer:ArticleIndexSerializer, status: :ok
   end
 
   # GET /articles/1
   def show
-    render json: @article, status: :ok
+    current_user.viewsleft += 1 if current_user.lastview < Date.today
+    if @article.user_id == current_user.id
+      render json: @article, status: :ok
+    elsif current_user.viewsleft > 0
+      #1 free view per day
+
+      current_user.viewsleft -= 1
+      current_user.save
+
+      current_user.lastview = Date.today
+      current_user.save
+      @article.views += 1
+      @article.save
+      render json: @article, status: :ok
+    else 
+      render json: {message: "No views left"}, status: :ok
+    end
   end
 
   # GET /articles/myarticles
@@ -63,7 +79,7 @@ class ArticlesController < ApplicationController
       liked = liked.map{|id| Article.find(id).user_id}
       @articles = Article.where(user_id: liked).order(likes: :desc)
     end
-    render json: @articles, status: :ok
+    render json: @articles, each_serializer:ArticleIndexSerializer, status: :ok
   end
 
   def topics
@@ -78,7 +94,7 @@ class ArticlesController < ApplicationController
     articles = articles.map{|a| {id: a.id, value: a.likes.to_i+a.comments_cnt.to_i+a.views.to_i}}
     articles = articles.sort_by{|a| -1*a[:value]}
     articles = articles.map{|a| Article.find(a[:id])}
-    render json: articles, status: :ok
+    render json: articles, serializer:ArticleIndexSerializer, status: :ok
   end
 
   # POST /articles

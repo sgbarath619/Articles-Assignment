@@ -1,6 +1,7 @@
 require "razorpay"
-require "openssl"
+
 class PaymentController < ApplicationController
+  before_action :authenticate_user!
   def create
     begin
       Razorpay.setup("rzp_test_hexb77iBAzbcUW", "Qm4oleMueXxmEpzwCvnR1oJb")
@@ -17,6 +18,8 @@ class PaymentController < ApplicationController
       def webhook
 
         if params[:razorpay_signature].present?
+          current_user.viewsleft += 5
+          current_user.save
           render json: params.as_json.merge(verification: "successfull"), status: :ok
         else
           render json: params.as_json.merge(verification: "unsuccessfull"), status: :unprocessable_entity

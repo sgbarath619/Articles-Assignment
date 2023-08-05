@@ -1,5 +1,5 @@
 class UserSerializer < ActiveModel::Serializer
-  attributes :id, :email, :name, :created_at, :follower_cnt, :followee_cnt, :liked_articles, :articles, 
+  attributes :id, :email, :name, :created_at, :follower_cnt, :followee_cnt, :viewsleft, :lastview, :liked_articles, :articles, 
 
   def articles
     # object.articles.map do |article| 
