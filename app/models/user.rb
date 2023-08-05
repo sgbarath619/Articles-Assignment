@@ -11,6 +11,8 @@ class User < ApplicationRecord
   end
 
   has_many :articles, class_name: "Article", foreign_key: "user_id", dependent: :destroy
+  
+  has_many :lists, class_name: "List", foreign_key: "user_id", dependent: :destroy
 
   # we r following
   has_many :followed_users, class_name: "FollowRelation", foreign_key: "follower_id", dependent: :destroy

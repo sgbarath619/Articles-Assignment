@@ -61,13 +61,6 @@ class ArticlesController < ApplicationController
   # GET /articles/myarticles
   def myarticles
     @articles = current_user.articles.all.order(created_at: :desc)
-    # @articles = @articles.map{ |article| 
-    #   if article.image.attached? 
-    #     article.as_json.merge(image_path: url_for(article.image))
-    #   else
-    #     article
-    #   end
-    # }
     render json: @articles, status: :ok
   end
 

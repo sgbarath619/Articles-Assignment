@@ -15,6 +15,13 @@ Rails.application.routes.draw do
   get "articles/topics"
   get "articles/toparticles"
 
+  get "lists/mylists"
+  post "lists/create" => 'lists#create'
+  get "lists/:id/show" => 'lists#show'
+  patch "lists/:id/add" => 'lists#add'
+  delete "lists/:id/remove" => 'lists#remove'
+  delete "lists/:id/deletelist" => 'lists#deletelist'
+
   post "payment/create"
   post "payment/verify", to:"payment#webhook"
 
